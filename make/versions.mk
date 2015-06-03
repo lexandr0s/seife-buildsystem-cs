@@ -17,6 +17,9 @@ AZBOX_DVB_M_VER=14092013
 AZBOX_INITRAMFS_ME=14092013
 AZBOX_INITRAMFS_MINIME=14092013
 
+# libbluray: an open-source library designed for Blu-Ray Discs playback
+LIBBLURAY_VER=0.5.0
+
 # libdid3tag; writing, reading and manipulating ID3 tags
 ID3TAG_VER=0.15.1
 ID3TAG_SUBVER=b
@@ -46,7 +49,7 @@ UTIL_LINUX_NG_VER=2.18
 CURL_VER=7.28.0
 
 # libpng; reference library for reading and writing PNGs
-PNG_VER=1.6.6
+PNG_VER=1.6.12
 
 # freetype; free, high-quality and portable Font engine
 FREETYPE_VER=2.5.0.1
@@ -65,9 +68,12 @@ OPENSSL_VER=0.9.8
 OPENSSL_SUBVER=q
 
 # libffmpeg; complete, cross-platform solution to record, convert and stream audio and video
-FFMPEG_VER=2.1.3
+FFMPEG_VER=2.0.2
 ifeq ($(PLATFORM), coolstream)
 FFMPEG_VER=1.2
+endif
+ifeq ($(PLATFORM), spark)
+FFMPEG_VER=2.3.3
 endif
 
 # libogg; encoding, decoding of the ogg file format
@@ -77,7 +83,7 @@ OGG_VER=1.3.0
 VORBIS_VER=1.3.3
 
 # libass: ass / ssa subtitle renderer
-LIBASS_VER=0.9.11
+LIBASS_VER=0.11.1
 
 # azbox kernel
 LINUX_AZBOX_VER=3.9.2
@@ -87,9 +93,32 @@ LIRC_VER=0.9.0
 
 # lua: easily embeddable scripting language
 LUA_VER=5.2.3
+LUA_VER_SHORT=5.2
 
 # luaposix: posix bindings for lua
 LUAPOSIX_VER=31
+
+# luasocket: socket bindings for lua
+LUASOCKET_VER=2.1
+LUASOCKET_TAG=22cd5833fcc0e272f26004a79c8545e959ba406b
+
+# luaexpat
+LUAEXPAT_VER=1.2.0
+LUAEXPAT_TAG=b4e6b167e020
+
+# luasoap
+LUASOAP_VER=3.0
+
+# luacurl
+LUACURL_VER=20130218
+LUACURL_TAG=89ca8b6b8fdc9c0237bf6184abb1885101d2023e
+
+# luasec (prosody version)
+LUASEC_PROSODY_VER=0.5.1
+
+# lua-feedparser
+LUAFEEDPARSER_VER=0.7
+LUAFEEDPARSER_TAG=74a96a4d8a9939108ac96948c40619028b7e3cc2
 
 # ncurses; software for controlling writing to the console screen
 NCURSES_VER=5.6
@@ -125,14 +154,14 @@ EXPAT_VER=2.0.1
 ATTR_VER=2.4.44
 
 # libdvbsi++; libdvbsi++ is a open source C++ library for parsing DVB Service Information and MPEG-2 Program Specific Information.
-LIBDVBSI_VER=0.3.6
+LIBDVBSI_VER=0.3.7
 
 #############################
 # tools; make/system-tools.mk
 #############################
 
 # vsftpd; a small, tiny and "v"ery "s"ecure "ftp" deamon
-VSFTPD_VER=2.3.5
+VSFTPD_VER=3.0.2
 
 # rsync; fast and extraordinarily versatile file copying tool
 RSYNC-VER=3.0.7
@@ -151,11 +180,14 @@ BUSYBOX_VER = $(BUSYBOX_REL).$(BUSYBOX_PATCH)
 # e2fsprogs; filesystem utilities for use with the ext[x] filesystem
 E2FSPROGS-VER=1.42
 
+# yaffs2utils; filesystem utilities for YAFFS2 filesystems
+YAFFS2UTILS-VER=0.2.9
+
 # xfsprogs; Utilities for managing the XFS filesystem
 XFSPROGS-VER=3.1.8
 
 # ntfs-3g; file system driver for the NTFS file system, enabling read/write support of NTFS file systems
-NTFS_3G_VER=2012.1.15
+NTFS_3G_VER=2013.1.13
 
 # autofs; mounting filesystems on demand
 AUTOFS-VER=4.1.4
@@ -179,13 +211,13 @@ FBSHOT-VER=0.3
 TCPDUMP-VER=4.2.0
 
 # timezone files
-TZ_VER = 2012b
+TZ_VER = 2012d
 
 # systemd; a system and service manager for Linux
 SYSTEMD-VER=19
 
 # dbus; message bus system
-DBUS-VER=1.4.6
+DBUS-VER=1.6.12
 
 # ntp; synchronize system clock over a network
 NTP_VER=4.2.6p5
@@ -206,7 +238,7 @@ GST123_VER=0.3.1
 LIBFFI_VER=3.0.11
 
 # links; a text WWW browser, similar to Lynx
-LINKS-VER=2.3pre1
+LINKS-VER=2.7
 
 # qt-everythere-opensource-src; the Qt4 package contains several C++ libraries with both GUI and non-GUI components
 QT-VER=4.6.3
@@ -223,7 +255,7 @@ LIBXML2_VER=2.8.0
 DROPBEAR-VER=0.53.1
 
 # opkg; a lightweight package management system based on Ipkg
-OPKG_VER=0.2.0
+OPKG_VER=0.2.2
 
 ## for recent versions, the SVN trunk rev is used:
 #OPKG_SVN=635
@@ -247,6 +279,36 @@ FUSE_VER=2.9.2
 # ALSA, the Advanced Linux Sound Architecture
 ALSA_VER=1.0.25
 
+# WPA Supplicant
+WPASUPP_VER=1.0
+
+# Wireless Tools
+WIRELESSTOOLS_VER=29
+
+# Netlink Protocol Library Suite (libnl)
+LIBNL_VER=1.1
+
+# GraphLCD
+GRAPHLCD_VER=a39f265732d0bc28cb66b58b5ecf1964a130d02b
+
+# LZO Library
+LZO_VER=2.06
+
+# USB ModeSwitch
+USB_MODESWITCH_VER=1.2.4
+USB_MODESWITCH_DATA_VER=20120815
+
+# PPP
+PPP_VER=2.4.5
+# from Debian:
+PPP_DIFF_VER=2.4.5-5.1
+
+# mtd-utils
+MTD_UTILS_VER=1.5.0
+
+# GNU FriBidi
+FRIBIDI_VER=0.19.4
+
 # libusb; a C library that gives applications easy access to USB devices
 USB_VER=1.0.9
 
@@ -261,6 +323,34 @@ LCD4LINUX_VER=0.10.0
 LCD4LINUX_SVN=1184
 LCD4LINUX_SVN_VER=$(LCD4LINUX_VER)+svnr$(LCD4LINUX_SVN)
 
+# AIO-GRAB
+AIOGRAB_VER=47983a78821c0fdbef3aab36113d5c6fc34bb11b
+
+# OpenVPN
+OPENVPN_VER=2.3.2
+
+# shairport
+SHAIRPORT_VER=1.0
+SHAIRPORT_COMMIT=bb04e3b07136b63168dfeaa252b462a9239b75c4
+SHAIRPORT_BRANCH=1.0-dev
+
+# shairplay
+SHAIRPLAY_VER=1.0
+#SHAIRPLAY_COMMIT=c8920724b694ee2b35dcb104f0bf169eb8a858d9
+SHAIRPLAY_COMMIT=193138f39adc47108e4091753ea6db8d15ae289a
+
+# libao: a cross platform audio library
+LIBAO_VER=1.1.0
+
+# howl is a cross platform implementation of Zeroconf/Rendezvous
+HOWL_VER=1.0.0
+
+# libdaemon
+LIBDAEMON_VER=0.14
+
+# JFS for Linux
+JFSUTILS_VER=1.1.15
+
 ##################################
 # devel-tools; make/devel-tools.mk
 ##################################
@@ -269,7 +359,7 @@ LCD4LINUX_SVN_VER=$(LCD4LINUX_VER)+svnr$(LCD4LINUX_SVN)
 GDB_VER=7.3
 
 # mtd-utils for the host...
-MTD_UTILS_VER = 1.4.9
+MTD_UTILS_VER_HOST = 1.5.0
 
 # wget for retrieving files using HTTP, HTTPS and FTP
 WGET_VER=1.14
@@ -286,4 +376,35 @@ LIBSIGCPP_VER=$(LIBSIGCPP_MAJOR).$(LIBSIGCPP_MINOR).$(LIBSIGCPP_MICRO)
 #djmount: mount MediaServers content as a Linux filesystem 
 DJMOUNT_VER=0.71
 
-LIBBLURAY_VER = 0.5.0
+# udpxy: mall-footprint UNIX/Linux daemon to relay multicast UDP traffic to client's TCP (HTTP) connection
+UDPXY_VER=1.0.23-9
+
+# xupnpd - eXtensible UPnP agent 
+XUPNPD_REV=392
+
+# Send mail via SMTP protocol from command line
+MAILSEND_VER=1.17b14
+
+# NFS Utilities - the userspace server and client tools necessary to use the kernel's NFS abilities
+NFSUTILS_VER=1.2.9
+
+# libevent – an event notification library
+LIBEVENT_VER=2.0.21-stable
+
+# libnfsidmap - a library holding multiple methods of mapping names to id's and visa versa
+LIBNFSIDMAP_VER=0.25
+
+# hd-idle is a [Linux] utility program for spinning-down external disks after a period of idle time.
+HDIDLE_VER=1.04
+
+# hdparm - get/set ATA/SATA drive parameters
+HDPARM_VER=9.43
+
+# sdparm - access SCSI device parameters
+SDPARM_VER=1.08
+
+# prelink - ELF prelinking utility to speed up dynamic linking.
+PRELINK_VER=20130503
+
+# elfutils
+ELFUTILS_VER=0.159
