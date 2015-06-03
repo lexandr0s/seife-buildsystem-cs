@@ -371,25 +371,27 @@ endif
 $(TARGETPREFIX)/include/linux/dvb:
 	mkdir -p $@
 
+#$(PATCHES)/sparkdrivers/0001-player2_191-silence-kmsg-spam.patch \
+#$(PATCHES)/sparkdrivers/0006-frontends-spark7162-silence-kmsg-spam.patch \
+#$(PATCHES)/sparkdrivers/0001-import-cec-from-pinky-s-git.patch \
+#$(PATCHES)/sparkdrivers/0002-aotom-fix-include-file.patch \
+#$(PATCHES)/sparkdrivers/0003-aotom-add-VFDGETVERSION-ioctl-to-find-FP-type.patch \
+#$(PATCHES)/sparkdrivers/0004-aotom-improve-scrolling-text-code.patch \
+#$(PATCHES)/sparkdrivers/0005-aotom-speed-up-softi2c-lowering-CPU-load-of-aotom-dr.patch \
+#$(PATCHES)/sparkdrivers/0006-aotom-add-additional-chars-for-VFD-fix-missing-chars.patch \
+#$(PATCHES)/sparkdrivers/0007-aotom-register-reboot_notifier-implement-rtc-driver.patch \
+#$(PATCHES)/sparkdrivers/0002-e2proc-silence-kmsg-spam.patch \
+#$(PATCHES)/sparkdrivers/0003-pti-silence-kmsg-spam.patch \
+#$(PATCHES)/sparkdrivers/0005-frontends-spark_dvbapi5-silence-kmsg-spam.patch \
+#$(SOURCE_DIR)/tdt-driver/.git \
+
 # the dependency on .../tdt-driver/.git should trigger on updated git...
 $(BUILD_TMP)/tdt-driver: \
-$(SOURCE_DIR)/tdt-driver/.git \
-$(PATCHES)/sparkdrivers/0001-player2_191-silence-kmsg-spam.patch \
-$(PATCHES)/sparkdrivers/0002-e2proc-silence-kmsg-spam.patch \
-$(PATCHES)/sparkdrivers/0003-pti-silence-kmsg-spam.patch \
 $(PATCHES)/sparkdrivers/0004-stmfb-silence-kmsg-spam.patch \
-$(PATCHES)/sparkdrivers/0005-frontends-spark_dvbapi5-silence-kmsg-spam.patch \
-$(PATCHES)/sparkdrivers/0006-frontends-spark7162-silence-kmsg-spam.patch \
-$(PATCHES)/sparkdrivers/0001-import-cec-from-pinky-s-git.patch \
-$(PATCHES)/sparkdrivers/0002-aotom-fix-include-file.patch \
-$(PATCHES)/sparkdrivers/0003-aotom-add-VFDGETVERSION-ioctl-to-find-FP-type.patch \
-$(PATCHES)/sparkdrivers/0004-aotom-improve-scrolling-text-code.patch \
-$(PATCHES)/sparkdrivers/0005-aotom-speed-up-softi2c-lowering-CPU-load-of-aotom-dr.patch \
-$(PATCHES)/sparkdrivers/0006-aotom-add-additional-chars-for-VFD-fix-missing-chars.patch \
-$(PATCHES)/sparkdrivers/0007-aotom-register-reboot_notifier-implement-rtc-driver.patch \
 | $(TARGETPREFIX)/include/linux/dvb
 	rm -fr $@ $@-7162
-	cp -a $(SOURCE_DIR)/tdt-driver $(BUILD_TMP)
+#	cp -a $(SOURCE_DIR)/tdt-driver $(BUILD_TMP)
+	cp -a $(SOURCE_DIR)/tdt/tdt/cvs/driver $(BUILD_TMP)/tdt-driver
 	set -e; cd $@; \
 		for i in $^; do \
 			test -d $$i && continue; \
@@ -412,7 +414,7 @@ $(PATCHES)/sparkdrivers/0007-aotom-register-reboot_notifier-implement-rtc-driver
 		cp -a stmfb/linux/drivers/video/stmfb.h $(TARGETPREFIX)/include/linux
 	cp -a $@/frontcontroller/aotom/aotom_main.h $(TARGETPREFIX)/include
 	# disable wireless build
-	sed -i 's/^\(obj-y.*+= wireless\)/# \1/' $@/Makefile
+	# sed -i 's/^\(obj-y.*+= wireless\)/# \1/' $@/Makefile
 	# disable led and button - it's not for spark
 	sed -i 's@^\(obj-y.*+= \(led\|button\)/\)@# \1@' $@/Makefile
 	cp -al $@ $@-7162
