@@ -419,10 +419,52 @@ $(D)/dropbear: $(ARCHIVE)/dropbear-$(DROPBEAR-VER).tar.bz2 | $(TARGETPREFIX)
 	$(REMOVE)/dropbear-$(DROPBEAR-VER) $(PKGPREFIX)
 	touch $@
 
-$(DEPDIR)/opkg: $(ARCHIVE)/opkg-$(OPKG_VER).tar.gz | $(TARGETPREFIX)
+#$(DEPDIR)/opkg: $(ARCHIVE)/opkg-$(OPKG_VER).tar.gz | $(TARGETPREFIX)
+#	$(UNTAR)/opkg-$(OPKG_VER).tar.gz
+#	set -e; cd $(BUILD_TMP)/opkg-$(OPKG_VER); \
+#		$(PATCH)/opkg-$(OPKG_VER)-dont-segfault.diff; \
+#		autoreconf -v --install; \
+#		echo ac_cv_func_realloc_0_nonnull=yes >> config.cache; \
+#		$(CONFIGURE) \
+#		--prefix= \
+#		--build=$(BUILD) \
+#		--host=$(TARGET) \
+#		--disable-curl \
+#		--disable-gpg \
+#		--disable-shared \
+#		--config-cache \
+#		--with-opkglibdir=/var/lib \
+#		--mandir=$(BUILD_TMP)/.remove; \
+#		$(MAKE) all exec_prefix=; \
+#		make install prefix=$(PKGPREFIX); \
+#		make distclean; \
+#		./configure \
+#		--prefix= \
+#		--disable-curl \
+#		--disable-gpg \
+#		--disable-shared \
+#		--with-opkglibdir=/var/lib; \
+#		$(MAKE) all; \
+#		cp -a src/opkg-cl $(HOSTPREFIX)/bin
+#	install -d -m 0755 $(PKGPREFIX)/var/lib/opkg
+#	install -d -m 0755 $(PKGPREFIX)/etc/opkg
+#	ln -s opkg-cl $(PKGPREFIX)/bin/opkg # convenience symlink
+#	echo "# example config file, copy to opkg.conf and edit" > $(PKGPREFIX)/etc/opkg/opkg.conf.example
+#	echo "src server http://server/dist/$(PLATFORM)" >> $(PKGPREFIX)/etc/opkg/opkg.conf.example
+#	echo "# add an optional cache directory, important if not enough flash memory is available!" >> $(PKGPREFIX)/etc/opkg/opkg.conf.example
+#	echo "# directory must exist before executing of opkg" >> $(PKGPREFIX)/etc/opkg/opkg.conf.example
+#	echo "option cache /tmp/media/sda1/.opkg" >> $(PKGPREFIX)/etc/opkg/opkg.conf.example
+#	$(REMOVE)/opkg-$(OPKG_VER) $(PKGPREFIX)/.remove
+#	cp -a $(PKGPREFIX)/* $(TARGETPREFIX)
+#	$(REWRITE_PKGCONF) $(PKG_CONFIG_PATH)/libopkg.pc
+#	rm -rf $(PKGPREFIX)/lib $(PKGPREFIX)/include
+#	PKG_VER=$(OPKG_VER) $(OPKG_SH) $(CONTROL_DIR)/opkg
+#	rm -rf $(PKGPREFIX)
+#	touch $@
+
+$(DEPDIR)/opkg: $(ARCHIVE)/opkg-$(OPKG_VER).tar.gz $(PATCHES)/.rebuild.opkg | $(TARGETPREFIX)
 	$(UNTAR)/opkg-$(OPKG_VER).tar.gz
 	set -e; cd $(BUILD_TMP)/opkg-$(OPKG_VER); \
-		$(PATCH)/opkg-$(OPKG_VER)-dont-segfault.diff; \
 		autoreconf -v --install; \
 		echo ac_cv_func_realloc_0_nonnull=yes >> config.cache; \
 		$(CONFIGURE) \
@@ -819,3 +861,21 @@ $(D)/xmlto: $(ARCHIVE)/xmlto-$(XMLTO_VER).tar.gz | $(TARGETPREFIX)
 	rm -rf $(PKGPREFIX)
 	touch $@
 
+$(D)/libao: alsa-lib alsa-utils $(ARCHIVE)/libao-$(LIBAO_VER).tar.gz
+	-rm -rf $(PKGPREFIX) $(BUILD_TMP)/libao-$(LIBAO_VER) ; \
+	$(UNTAR)/libao-$(LIBAO_VER).tar.gz && \
+	cd $(BUILD_TMP)/libao-$(LIBAO_VER) && \
+	sed -i -e "s#@plugindir@#/lib/ao/plugins-4#" src/Makefile.am && \
+	sed -i -e "s#@plugindir@#/lib/ao/plugins-4#" src/Makefile.in && \
+	$(BUILDENV) \
+	./configure --enable-alsa --enable-alsa-mmap --prefix=$(PKGPREFIX) --build=$(BUILD) --host=$(TARGET) --target=$(TARGET) --enable-shared --disable-static && \
+	make install && \
+	cp -a $(PKGPREFIX)/* $(TARGETPREFIX)/ && \
+	$(REWRITE_PKGCONF) $(PKG_CONFIG_PATH)/ao.pc && \
+	$(REWRITE_LIBTOOL)/libao.la && \
+	rm -rf $(PKGPREFIX)/share $(PKGPREFIX)/include $(PKGPREFIX)/lib/pkgconfig $(PKGPREFIX)/lib/*.la $(PKGPREFIX)/lib/ao/plugins-4/*.la && \
+	$(TARGET)-strip `find $(PKGPREFIX) -type f` && \
+	PKG_DEP=`opkg-find-requires.sh $(PKGPREFIX)` PKG_VER=$(SHAIRPLAY_VER) $(OPKG_SH) $(CONTROL_DIR)/libao && \
+	rm -rf $(PKGPREFIX) $(BUILD_TMP)/libao-$(LIBAO_VER) && \
+	touch $@
+	
