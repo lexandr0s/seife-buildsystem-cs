@@ -275,22 +275,150 @@ $(D)/openssl: $(ARCHIVE)/openssl-$(OPENSSL_VER)$(OPENSSL_SUBVER).tar.gz | $(TARG
 	rm -rf $(PKGPREFIX)
 	touch $@
 
-libbluray: $(TARGETPREFIX)/lib/libbluray.so
-$(TARGETPREFIX)/lib/libbluray.so: $(ARCHIVE)/libbluray-$(LIBBLURAY_VER).tar.bz2 | $(TARGETPREFIX)
+#libbluray: $(TARGETPREFIX)/lib/libbluray.so
+#$(TARGETPREFIX)/lib/libbluray.so: $(ARCHIVE)/libbluray-$(LIBBLURAY_VER).tar.bz2 | $(TARGETPREFIX)
+#	$(UNTAR)/libbluray-$(LIBBLURAY_VER).tar.bz2
+#	set -e; cd $(BUILD_TMP)/libbluray-$(LIBBLURAY_VER); \
+#		$(PATCH)/0001-Optimized-file-I-O-for-chained-usage-with-libavforma.patch; \
+#		$(PATCH)/0002-Added-bd_get_clip_infos.patch; \
+#		$(PATCH)/0003-Don-t-abort-demuxing-if-the-disc-looks-encrypted.patch; \
+#		$(CONFIGURE) --prefix= \
+#			--without-libxml2 \
+#			--without-freetype \
+#			--disable-examples \
+#			; \
+#		$(MAKE); \
+#		make install DESTDIR=$(TARGETPREFIX); \
+#	$(REWRITE_PKGCONF) $(PKG_CONFIG_PATH)/libbluray.pc
+#	$(REMOVE)/libbluray-0.5.0
+
+$(D)/libbluray: $(D)/libxml2 $(D)/zlib $(ARCHIVE)/libbluray-$(LIBBLURAY_VER).tar.bz2
 	$(UNTAR)/libbluray-$(LIBBLURAY_VER).tar.bz2
 	set -e; cd $(BUILD_TMP)/libbluray-$(LIBBLURAY_VER); \
-		$(PATCH)/0001-Optimized-file-I-O-for-chained-usage-with-libavforma.patch; \
-		$(PATCH)/0002-Added-bd_get_clip_infos.patch; \
-		$(PATCH)/0003-Don-t-abort-demuxing-if-the-disc-looks-encrypted.patch; \
-		$(CONFIGURE) --prefix= \
-			--without-libxml2 \
-			--without-freetype \
-			--disable-examples \
-			; \
+		$(PATCH)/libbluray-0001-Optimized-file-I-O-for-chained-usage-with-libavforma.patch; \
+		$(PATCH)/libbluray-0003-Added-bd_get_clip_infos.patch; \
+		$(PATCH)/libbluray-0005-Don-t-abort-demuxing-if-the-disc-looks-encrypted.patch; \
+		$(PATCH)/libbluray-0006-disable-M2TS_TRACE.patch; \
+		$(CONFIGURE) --prefix= LDFLAGS="-Wl,-rpath-link,$(TARGETLIB)" CFLAGS="$(TARGET_CFLAGS)" \
+			     --without-freetype; \
 		$(MAKE); \
-		make install DESTDIR=$(TARGETPREFIX); \
+		$(MAKE) install DESTDIR=$(TARGETPREFIX); \
+	$(REWRITE_LIBTOOL)/libbluray.la
 	$(REWRITE_PKGCONF) $(PKG_CONFIG_PATH)/libbluray.pc
-	$(REMOVE)/libbluray-0.5.0
+	$(REMOVE)/libbluray-$(LIBBLURAY_VER) $(PKGPREFIX)
+	mkdir -p $(PKGPREFIX)/lib
+	cp -a $(TARGETPREFIX)/lib/libbluray.so* $(PKGPREFIX)/lib
+	PKG_VER=$(LIBBLURAY_VER) \
+		PKG_DEP=`opkg-find-requires.sh $(PKGPREFIX)` \
+		PKG_PROV=`opkg-find-provides.sh $(PKGPREFIX)` \
+	$(OPKG_SH) $(CONTROL_DIR)/libbluray
+	rm -rf $(PKGPREFIX)
+	touch $@
+
+#ifeq ($(BOXARCH), arm)
+#FFMPEG_CONFIGURE  = --arch=arm --cpu=armv6 --disable-neon
+#FFMPEG_CONFIGURE += --disable-decoders --disable-parsers --disable-demuxers
+#FFMPEG_CONFIGURE += --disable-ffmpeg --disable-swscale --disable-filters --enable-swresample --disable-postproc
+#FFMPEG_CONFIGURE += --enable-parser=aac --enable-parser=aac_latm --enable-parser=ac3 --enable-parser=dca
+#FFMPEG_CONFIGURE += --enable-parser=mpeg4video --enable-parser=mpegvideo --enable-parser=mpegaudio
+#FFMPEG_CONFIGURE += --enable-parser=h264 --enable-parser=vc1 --enable-parser=dvdsub --enable-parser=dvbsub
+#FFMPEG_CONFIGURE += --enable-decoder=dca --enable-decoder=dvdsub --enable-decoder=dvbsub
+#FFMPEG_CONFIGURE += --enable-decoder=text --enable-decoder=srt --enable-decoder=subrip
+#FFMPEG_CONFIGURE += --enable-decoder=subviewer --enable-decoder=subviewer1
+#FFMPEG_CONFIGURE += --enable-decoder=xsub --enable-decoder=pgssub
+#FFMPEG_CONFIGURE += --enable-demuxer=aac --enable-demuxer=ac3
+#FFMPEG_CONFIGURE += --enable-demuxer=avi --enable-demuxer=mov --enable-demuxer=vc1
+#FFMPEG_CONFIGURE += --enable-demuxer=mpegts --enable-demuxer=mpegtsraw --enable-demuxer=mpegps
+#FFMPEG_CONFIGURE += --enable-demuxer=mpegvideo --enable-demuxer=wav --enable-demuxer=pcm_s16be
+#FFMPEG_CONFIGURE += --enable-demuxer=mp3 --enable-demuxer=pcm_s16le --enable-demuxer=matroska
+#FFMPEG_CONFIGURE += --enable-demuxer=flv --enable-demuxer=rm
+#FFMPEG_CONFIGURE += --enable-network --enable-protocol=http
+#FFMPEG_CONFIGURE += --enable-demuxer=rtsp
+#FFMPEG_CONFIGURE += --enable-protocol=rtmp --enable-protocol=rtmpe --enable-protocol=rtmps --enable-protocol=rtmpte --enable-protocol=rtp
+#FFMPEG_CONFIGURE += --enable-bsfs
+#FFMPEG_CONFIGURE += --enable-libbluray --enable-protocol=bluray
+#endif
+#ifeq ($(BOXARCH), powerpc)
+#FFMPEG_CONFIGURE  = --arch=ppc
+#FFMPEG_CONFIGURE += --disable-decoders
+#FFMPEG_CONFIGURE += --disable-parsers --disable-demuxers --enable-ffmpeg
+#FFMPEG_CONFIGURE += --enable-parser=mjpeg --enable-demuxer=mjpeg --enable-decoder=mjpeg
+#FFMPEG_CONFIGURE += --enable-encoder=mpeg2video --enable-muxer=mpeg2video
+#FFMPEG_CONFIGURE += --disable-bsfs
+#FFMPEG_CONFIGURE += --disable-network
+#FFMPEG_CONFIGURE += --enable-dct
+#endif
+## todo: check. this is a plain copy of tripledragon configure...
+#ifeq ($(BOXARCH), sh4)
+#FFMPEG_CONFIGURE  = --arch=sh4
+#FFMPEG_CONFIGURE += --enable-ffmpeg --enable-demuxers
+#FFMPEG_CONFIGURE += --enable-parser=mjpeg --enable-demuxer=mjpeg --enable-decoder=mjpeg
+#FFMPEG_CONFIGURE += --enable-encoder=mpeg2video --enable-muxer=mpeg2video
+#FFMPEG_CONFIGURE += --enable-protocol=bluray --enable-libbluray
+#FFMPEG_CONFIGURE += --disable-bsfs
+#FFMPEG_CONFIGURE += --disable-network
+#endif
+#ifeq ($(BOXARCH), mipsel)
+#FFMPEG_CONFIGURE  = --arch=mips
+#FFMPEG_CONFIGURE += --enable-ffmpeg --enable-demuxers
+#FFMPEG_CONFIGURE += --enable-parser=mjpeg --enable-demuxer=mjpeg --enable-decoder=mjpeg
+#FFMPEG_CONFIGURE += --enable-encoder=mpeg2video --enable-muxer=mpeg2video
+#FFMPEG_CONFIGURE += --disable-bsfs
+#FFMPEG_CONFIGURE += --disable-network
+#endif
+#$(D)/ffmpeg: $(D)/ffmpeg-$(FFMPEG_VER)
+#	touch $@
+#$(D)/ffmpeg-$(FFMPEG_VER): $(ARCHIVE)/ffmpeg-$(FFMPEG_VER).tar.bz2 | $(TARGETPREFIX)
+#ifeq ($(PLATFORM), coolstream)
+#	$(MAKE) $(TARGETPREFIX)/lib/libbluray.so
+#	if ! test -d $(UNCOOL_GIT)/cst-public-libraries-ffmpeg; then \
+#		make $(UNCOOL_GIT)/cst-public-libraries-ffmpeg; \
+#	fi
+#	rm -rf $(BUILD_TMP)/ffmpeg-$(FFMPEG_VER)
+#	cp -a $(UNCOOL_GIT)/cst-public-libraries-ffmpeg $(BUILD_TMP)/ffmpeg-$(FFMPEG_VER)
+#else
+#	$(UNTAR)/ffmpeg-$(FFMPEG_VER).tar.bz2
+#endif
+#	set -e; cd $(BUILD_TMP)/ffmpeg-$(FFMPEG_VER); \
+#		sed -i '/\(__DATE__\|__TIME__\)/d' ffprobe.c; # remove build time \
+#		sed -i -e 's/__DATE__/""/' -e 's/__TIME__/""/' cmdutils.c; \
+#		./configure \
+#			--disable-encoders \
+#			--disable-muxers --disable-ffplay --disable-ffserver \
+#			--disable-protocols \
+#			$(FFMPEG_CONFIGURE) \
+#			--enable-decoder=dvbsub --enable-demuxer=mpegps \
+#			--disable-devices --disable-mmx --disable-altivec \
+#			--enable-protocol=file \
+#			--disable-zlib --enable-bzlib \
+#			--disable-ffprobe \
+#			--disable-static --enable-shared \
+#			--enable-cross-compile \
+#			--cross-prefix=$(TARGET)- \
+#			--target-os=linux \
+#			--enable-debug \
+#			--disable-doc \
+#			--extra-cflags="$(TARGET_CFLAGS)" \
+#			--extra-ldflags="$(TARGET_LDFLAGS) `pkg-config --libs libbluray` -ldl" \
+#			--prefix=/; \
+#		$(MAKE); \
+#		make install DESTDIR=$(PKGPREFIX)
+#	rm -rf $(PKGPREFIX)/share/ffmpeg
+#	cp -a $(PKGPREFIX)/* $(TARGETPREFIX)
+#	cp $(BUILD_TMP)/ffmpeg-$(FFMPEG_VER)/version.h $(TARGETPREFIX)/lib/ffmpeg-version.h
+#	$(REWRITE_PKGCONF) $(PKG_CONFIG_PATH)/libavfilter.pc
+#	$(REWRITE_PKGCONF) $(PKG_CONFIG_PATH)/libavdevice.pc
+#	$(REWRITE_PKGCONF) $(PKG_CONFIG_PATH)/libavformat.pc
+#	$(REWRITE_PKGCONF) $(PKG_CONFIG_PATH)/libavcodec.pc
+#	$(REWRITE_PKGCONF) $(PKG_CONFIG_PATH)/libavutil.pc
+#	$(REWRITE_PKGCONF) $(PKG_CONFIG_PATH)/libswresample.pc
+#	test -e $(PKG_CONFIG_PATH)/libswscale.pc && $(REWRITE_PKGCONF) $(PKG_CONFIG_PATH)/libswscale.pc || true
+#	rm -rf $(PKGPREFIX)/include $(PKGPREFIX)/lib/pkgconfig $(PKGPREFIX)/lib/*.so $(PKGPREFIX)/.remove
+#	PKG_VER=$(FFMPEG_VER) PKG_PROV=`opkg-find-provides.sh $(PKGPREFIX)` \
+#		$(OPKG_SH) $(CONTROL_DIR)/ffmpeg
+#	$(REMOVE)/ffmpeg-$(FFMPEG_VER) $(PKGPREFIX)
+#	touch $@
+
 
 ifeq ($(BOXARCH), arm)
 FFMPEG_CONFIGURE  = --arch=arm --cpu=armv6 --disable-neon
@@ -313,7 +441,7 @@ FFMPEG_CONFIGURE += --enable-network --enable-protocol=http
 FFMPEG_CONFIGURE += --enable-demuxer=rtsp
 FFMPEG_CONFIGURE += --enable-protocol=rtmp --enable-protocol=rtmpe --enable-protocol=rtmps --enable-protocol=rtmpte --enable-protocol=rtp
 FFMPEG_CONFIGURE += --enable-bsfs
-FFMPEG_CONFIGURE += --enable-libbluray --enable-protocol=bluray
+FFMPEG_CONFIGURE += --enable-decoder=pcm_s16le --enable-decoder=pcm_s16le_planar --enable-demuxer=srt --enable-protocol=bluray --enable-libbluray
 endif
 ifeq ($(BOXARCH), powerpc)
 FFMPEG_CONFIGURE  = --arch=ppc
@@ -323,16 +451,18 @@ FFMPEG_CONFIGURE += --enable-parser=mjpeg --enable-demuxer=mjpeg --enable-decode
 FFMPEG_CONFIGURE += --enable-encoder=mpeg2video --enable-muxer=mpeg2video
 FFMPEG_CONFIGURE += --disable-bsfs
 FFMPEG_CONFIGURE += --disable-network
-FFMPEG_CONFIGURE += --enable-dct
 endif
 ## todo: check. this is a plain copy of tripledragon configure...
 ifeq ($(BOXARCH), sh4)
 FFMPEG_CONFIGURE  = --arch=sh4
 FFMPEG_CONFIGURE += --enable-ffmpeg --enable-demuxers
 FFMPEG_CONFIGURE += --enable-parser=mjpeg --enable-demuxer=mjpeg --enable-decoder=mjpeg
-FFMPEG_CONFIGURE += --enable-encoder=mpeg2video --enable-muxer=mpeg2video
+FFMPEG_CONFIGURE += --enable-encoder=mpeg2video --enable-encoder=png --enable-muxer=mpeg2video
 FFMPEG_CONFIGURE += --disable-bsfs
-FFMPEG_CONFIGURE += --disable-network
+FFMPEG_CONFIGURE += --enable-protocol=bluray --enable-libbluray
+FFMPEG_CONFIGURE += --enable-parser=aac --enable-parser=aac_latm --enable-parser=ac3
+FFMPEG_CONFIGURE += --enable-encoder=aac --enable-decoder=aac --enable-demuxer=aac --enable-demuxer=ac3
+#FFMPEG_CONFIGURE += --enable-avresample
 endif
 ifeq ($(BOXARCH), mipsel)
 FFMPEG_CONFIGURE  = --arch=mips
@@ -344,44 +474,45 @@ FFMPEG_CONFIGURE += --disable-network
 endif
 $(D)/ffmpeg: $(D)/ffmpeg-$(FFMPEG_VER)
 	touch $@
-$(D)/ffmpeg-$(FFMPEG_VER): $(ARCHIVE)/ffmpeg-$(FFMPEG_VER).tar.bz2 | $(TARGETPREFIX)
+$(D)/ffmpeg-$(FFMPEG_VER): libao libxml2 $(ARCHIVE)/ffmpeg-$(FFMPEG_VER).tar.bz2 $(PATCHES)/ffmpeg-hds.patch $(PATCHES)/.rebuild.ffmpeg $(D)/libbluray $(PATCHES)/ffmpeg-$(FFMPEG_VER)-61b5ef7754132c43e6db1a273066e82c469fa39c.diff | $(TARGETPREFIX)
 ifeq ($(PLATFORM), coolstream)
-	$(MAKE) $(TARGETPREFIX)/lib/libbluray.so
 	if ! test -d $(UNCOOL_GIT)/cst-public-libraries-ffmpeg; then \
 		make $(UNCOOL_GIT)/cst-public-libraries-ffmpeg; \
 	fi
 	rm -rf $(BUILD_TMP)/ffmpeg-$(FFMPEG_VER)
 	cp -a $(UNCOOL_GIT)/cst-public-libraries-ffmpeg $(BUILD_TMP)/ffmpeg-$(FFMPEG_VER)
 else
+	$(REMOVE)/ffmpeg-$(FFMPEG_VER) $(PKGPREFIX)
 	$(UNTAR)/ffmpeg-$(FFMPEG_VER).tar.bz2
 endif
 	set -e; cd $(BUILD_TMP)/ffmpeg-$(FFMPEG_VER); \
-		sed -i '/\(__DATE__\|__TIME__\)/d' ffprobe.c; # remove build time \
-		sed -i -e 's/__DATE__/""/' -e 's/__TIME__/""/' cmdutils.c; \
+		: $(PATCH)/ffmpeg-dvbsubs.diff; \
+		$(PATCH)/ffmpeg_define_STDC_CONSTANT_MACROS.patch; \
+		$(PATCH)/ffmpeg-avoid-UINT64_C.diff; \
+		$(PATCH)/ffmpeg-$(FFMPEG_VER)-remove-buildtime.diff; \
+		patch -Rp1 < $(PATCHES)/ffmpeg-$(FFMPEG_VER)-61b5ef7754132c43e6db1a273066e82c469fa39c.diff ; \
+		$(PATCH)/ffmpeg-hds.patch; \
 		./configure \
+			--extra-cflags="-I$(TARGET_CFLAGS)" \
+			--extra-ldflags="-L$(LD_FLAGS) -Wl,-rpath-link,$(TARGETLIB)" \
 			--disable-encoders \
 			--disable-muxers --disable-ffplay --disable-ffserver \
-			--disable-protocols \
 			$(FFMPEG_CONFIGURE) \
 			--enable-decoder=dvbsub --enable-demuxer=mpegps \
 			--disable-devices --disable-mmx --disable-altivec \
-			--enable-protocol=file \
-			--disable-zlib --enable-bzlib \
-			--disable-ffprobe \
+			--enable-zlib --enable-bzlib \
 			--disable-static --enable-shared \
 			--enable-cross-compile \
 			--cross-prefix=$(TARGET)- \
 			--target-os=linux \
-			--enable-debug \
+			--enable-debug --enable-stripping \
 			--disable-doc \
-			--extra-cflags="$(TARGET_CFLAGS)" \
-			--extra-ldflags="$(TARGET_LDFLAGS) `pkg-config --libs libbluray` -ldl" \
 			--prefix=/; \
 		$(MAKE); \
 		make install DESTDIR=$(PKGPREFIX)
 	rm -rf $(PKGPREFIX)/share/ffmpeg
 	cp -a $(PKGPREFIX)/* $(TARGETPREFIX)
-	cp $(BUILD_TMP)/ffmpeg-$(FFMPEG_VER)/version.h $(TARGETPREFIX)/lib/ffmpeg-version.h
+	cp $(BUILD_TMP)/ffmpeg-$(FFMPEG_VER)/version.h $(TARGETPREFIX)/lib/ffmpeg-version.h || true
 	$(REWRITE_PKGCONF) $(PKG_CONFIG_PATH)/libavfilter.pc
 	$(REWRITE_PKGCONF) $(PKG_CONFIG_PATH)/libavdevice.pc
 	$(REWRITE_PKGCONF) $(PKG_CONFIG_PATH)/libavformat.pc
@@ -390,8 +521,7 @@ endif
 	$(REWRITE_PKGCONF) $(PKG_CONFIG_PATH)/libswresample.pc
 	test -e $(PKG_CONFIG_PATH)/libswscale.pc && $(REWRITE_PKGCONF) $(PKG_CONFIG_PATH)/libswscale.pc || true
 	rm -rf $(PKGPREFIX)/include $(PKGPREFIX)/lib/pkgconfig $(PKGPREFIX)/lib/*.so $(PKGPREFIX)/.remove
-	PKG_VER=$(FFMPEG_VER) PKG_PROV=`opkg-find-provides.sh $(PKGPREFIX)` \
-		$(OPKG_SH) $(CONTROL_DIR)/ffmpeg
+	PKG_VER=$(FFMPEG_VER) PKG_DEP=`opkg-find-requires.sh $(PKGPREFIX)` PKG_PROV=`opkg-find-provides.sh $(PKGPREFIX)` $(OPKG_SH) $(CONTROL_DIR)/ffmpeg
 	$(REMOVE)/ffmpeg-$(FFMPEG_VER) $(PKGPREFIX)
 	touch $@
 
@@ -806,4 +936,15 @@ $(D)/libsigc++: $(ARCHIVE)/libsigc++-$(LIBSIGCPP_VER).tar.xz | $(TARGETPREFIX)
 	rm -rf $(PKGPREFIX)
 	touch $@
 
+$(D)/fribidi: $(ARCHIVE)/fribidi-$(FRIBIDI_VER).tar.bz2 $(PATCHES)/.rebuild.fribidi
+	$(UNTAR)/fribidi-$(FRIBIDI_VER).tar.bz2
+	set -e; cd $(BUILD_TMP)/fribidi-$(FRIBIDI_VER); \
+		$(CONFIGURE) --prefix= --disable-shared; \
+		$(MAKE); \
+		make install DESTDIR=$(TARGETPREFIX)
+	$(REWRITE_PKGCONF) $(PKG_CONFIG_PATH)/fribidi.pc
+	$(REWRITE_LIBTOOL)/libfribidi.la
+	$(REMOVE)/libfribidi-$(LIBFRIBIDI_VER)
+	touch $@
+	
 PHONY += ncurses-prereq rmfp_player
