@@ -152,11 +152,11 @@ $(TD_SVN):
 tdsvn: $(TD_SVN)
 
 # to automatically pull it in for sparkdriver target
-$(SOURCE_DIR)/tdt-driver/.git: | $(SOURCE_DIR)/tdt-driver
+#$(SOURCE_DIR)/tdt-driver/.git: | $(SOURCE_DIR)/tdt-driver
 
-$(SOURCE_DIR)/tdt-driver:
-	set -e; cd $(SOURCE_DIR); \
-		git clone $(GITORIOUS)/neutrino-mp/tdt-driver.git
+#$(SOURCE_DIR)/tdt-driver:
+#	set -e; cd $(SOURCE_DIR); \
+#		git clone $(GITORIOUS)/neutrino-mp/tdt-driver.git
 
 $(TDT_SRC):
 	set -e; cd $(SOURCE_DIR); \
