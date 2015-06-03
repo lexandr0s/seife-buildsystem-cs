@@ -4,8 +4,8 @@ SYSTEM_PKGS = neutrino-pkg minimal-system-pkgs
 SYSTEM_OPKGS =
 
 # additional stuff which is useful on most systems
-SYSTEM_PKGS  += e2fsprogs
-SYSTEM_OPKGS += e2fsprogs
+SYSTEM_PKGS  += alsa-lib libxml2 libbluray e2fsprogs
+SYSTEM_OPKGS += libbluray e2fsprogs
 
 glibc-pkg: $(TARGETPREFIX)/sbin/ldconfig
 	rm -rf $(PKGPREFIX)
@@ -319,6 +319,8 @@ spark-system-usb:
 		rm -fr sparksystem; mkdir sparksystem sparksystem/p1; \
 		cp -a script.img uImage* sparksystem/p1; \
 		cp -a install sparksystem/p2; \
+		cp -a script.img sparksystem/p2/boot; \
+		cp -a uImage-7162 sparksystem/p2/boot/uImage; \
 		cd sparksystem; \
 		tar -czf p1.tar.gz --owner=0 --group=0 -C p1 .; \
 		tar -czf p2.tar.gz --owner=0 --group=0 -C p2 .
